@@ -17,6 +17,7 @@ export default function Home () {
       }}
       >{x}</button>
     ))}
+    <button className="flex justify-center" style={{border: "2px solid", backgroundColor: "yellow"}} onClick={()=>{router.push('/three-together')}}>3 together</button>
     </div>
     </>
   )
