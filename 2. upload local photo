@@ -1,0 +1,36 @@
+import { useState } from "react"
+
+export default function imageuploadpage() {
+
+  const [imageurl, setimageurl] = useState(null)
+
+  const uploadimage = (e) => {
+    const file = e.target.files[0]
+    const reader = new FileReader()
+
+    reader.onloadend = () => {
+      setimageurl(reader.result)
+    }
+    if (file) {
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const deleteimage = (e) => {
+    e.preventDefault()
+    setimageurl(null)
+  }
+
+  return (
+    <>
+      <label>Upload Image</label>
+      <input type="file" onChange={uploadimage}></input>
+      <button onClick={deleteimage}>X</button>
+      {imageurl && (
+        <div>
+          <img src={imageurl} alt="noimage"></img>
+        </div>
+      )}
+    </>
+  )
+}
