@@ -1,0 +1,59 @@
+******FRONTEND******
+
+import { useSession } from 'next-auth/react';
+import { useEffect } from "react"
+import axios from "axios";
+
+const dashboard = () => {
+    const { data: session } = useSession()
+
+    console.log(session)
+
+    useEffect(()=>{
+        try{
+        const fetchdata = async() => {
+            const fetchusers = await axios.get("/api/userlist")
+            console.log('here is fetchusers list')
+            console.log('here is fetchusers list', fetchusers.data)
+        }
+        fetchdata()
+    }catch(err){
+        throw new Error("error")
+    }
+    },[])
+
+    
+
+    return (
+        <>
+            <h1>HELLO </h1>
+
+        </>
+    )
+}
+
+export default dashboard
+
+
+**********API**********
+
+
+import { getSession, useSession } from "next-auth/react";
+import User from "../models/User";
+import db from "@/utils/db";
+
+const handler = async (req,res) => {
+    const session = await getSession({req})
+
+    await db.connect()
+
+    try{
+        const products = await User.find({}, 'role')
+        await db.disconnect()
+        res.status(200).json(products)
+    }catch(err){
+        await db.disconnect()
+        res.status(500).json({message : 'error fetching'})
+    }
+}
+export default handler
