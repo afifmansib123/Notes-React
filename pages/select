@@ -1,0 +1,72 @@
+import { useSession } from 'next-auth/react';
+import { useState, useEffect } from "react"
+import axios from "axios";
+import { signOut } from 'next-auth/react';
+
+const dashboard = () => {
+    const { data: session } = useSession()
+
+    const [dashboardfor, setdashboard] = useState("")
+
+    console.log('id of user from session', session?.user?._id)
+
+    async function fetchlist() {
+        try {
+            const x = await axios.get("/api/userlist")
+            const match = x.data.find((user) => user._id === session?.user?._id)
+            setdashboard(match.role)
+        } catch (err) {
+            return
+        }
+    }
+    fetchlist()
+
+    const [doctortime, selectdoctortime] = useState("")
+
+    const handledoctortime = (e) => {
+        selectdoctortime(e.target.value)
+    }
+
+    const test = () => {
+        console.log(doctortime)
+    }
+
+    return (
+        <div className="container flex items-center">
+
+
+            {dashboardfor === "doctor" ? (
+                // dashboard for doctor
+                <>
+                    <section className="hero__section pt-[60px] 2xl:h-[800px]">
+                        <div className="container" style={{ textAlign: "center" }}>
+                            <h1 style={{ border: "1px solid blue" }}>Welcome {dashboardfor}</h1>
+                            
+                            <div className="container" style={{ textAlign: "center" }}>
+                                <select value={doctortime} onChange={handledoctortime}>
+                                    <option value={"ninetoten"}>9 AM - 10AM</option>
+                                    <option value={"tentoeleven"}>10 AM - 11AM</option>
+                                </select>
+
+                                <button className="bg-buttonBgColor py-2 px-6 rounded-[50px] text-white font-[600] h-[44px] flex items-center justify-center" onClick={test}>
+                                    Open Slot
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </>) : (
+                // dashboard for patient
+
+                <>
+                    <section className="hero__section pt-[60px] 2xl:h-[800px]">
+                        <div className="container" style={{ textAlign: "center" }}>
+                            <h1 style={{ border: "1px solid blue" }}>Welcome {dashboardfor}</h1>
+                            <div className="flex flex-col lg:flex-row gap-[90px] items-center justify-between">Hello world</div>
+                        </div>
+                    </section>
+                </>)}
+        </div>
+    )
+}
+
+export default dashboard
