@@ -1,0 +1,95 @@
+API ::
+
+
+import User from "@/pages/models/User"
+import db from "@/utils/db";
+
+const handler = async (req,res) => {
+    //const session = await getSession({req})
+    const { _id } = req.query;
+
+    await db.connect()
+
+    try{
+         await User.findByIdAndDelete(_id);
+
+        await db.disconnect();
+        res.send({ message: 'User Deleted' });
+    }catch(err){
+        await db.disconnect()
+        res.status(500).json({message : 'error fetching'})
+    }
+}
+export default handler
+
+
+
+::::: FRONTEND 
+
+
+import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
+import axios from "axios"
+
+export default function admindashboard () {
+    let show
+    const {data : session} = useSession()
+
+    const [doclist, setlist] = useState([])
+
+    const deletdoctor = async (doctorid) => {
+        if (!window.confirm('Are you sure?')) {
+            return;
+          }
+        try{
+            await axios.delete(`/api/users/${doctorid}`);
+            alert(doctorid)
+        }catch(err){
+            console.error(err)
+        }
+    }
+
+    useEffect(()=>{
+
+    async function fetchlist() {
+        try {
+            const x = await axios.get("/api/userlist")
+            console.log(x.data)
+            let docs = x.data.filter((i)=>i.role === "doctor")
+            setlist(docs)
+        } catch (err) {
+            return err
+        }
+    }
+    fetchlist()
+    
+},[])
+
+
+    return(
+        <>
+        {
+            session?.user?.name === "Admin" ? (
+            <>
+            <h1 style={{ marginBottom: "10px", marginRight: "10px", marginLeft: "10px", marginBottom:"20px", textAlign: "center" }}>Welcome Admin</h1>
+            <h1 style={{ marginBottom: "10px", marginRight: "10px", marginLeft: "10px", textAlign: "center" }}>Below Are All The Doctors Listed :</h1>
+            <ul>
+            {doclist.map((items)=>(
+                <li key={items._id} style={{ marginBottom: "10px", marginRight: "10px", marginLeft: "10px", marginBottom:"20px", textAlign: "center" , border: "3px solid blue" }}>
+                <p>Doctor Name : {items.name} </p>
+                <p>Doctor Email : {items.email}</p>
+                <p>Doctor Certificate</p> <img src = {items.photo} alt = "jerin" height = {500} width = {500}></img>
+                <button className='p-4 border-b rounded-xl hover:bg-[#F31C06] duration-300 hover:text-black cursor-pointer border-red-500' onClick={()=> deletdoctor(items._id) }>Delete Doctor</button>
+                </li>
+            ))}
+            </ul>
+            </>
+            )
+            : (<>Admin authentication needed</>)
+        }
+        </>
+    )
+}
+
+
+
