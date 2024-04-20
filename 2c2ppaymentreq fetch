@@ -1,0 +1,59 @@
+// pages/payment.js
+
+import { useState } from 'react';
+
+const Payment = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = async () => {
+    setLoading(true);
+
+    try {
+      const url = 'https://payment.miqly.dev/2c2p/sunmith';
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      const body = JSON.stringify({
+        invoiceNo: 'INV123',
+        description: 'Payment for goods',
+        amount: 100.00
+      });
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: body
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to make payment request');
+      }
+
+      const responseData = await response.json();
+
+      // Check if response code is '0000'
+      if (responseData.respCode !== '0000') {
+        throw new Error(responseData.respDesc);
+      }
+
+      // Redirect user to the provided webPaymentUrl
+      window.location.href = responseData.webPaymentUrl;
+    } catch (error) {
+      console.error('Payment error:', error.message);
+      // Handle error appropriately, e.g., show error message to user
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Payment Page</h1>
+      <button onClick={handlePayment} disabled={loading}>
+        {loading ? 'Processing...' : 'Make Payment'}
+      </button>
+    </div>
+  );
+};
+
+export default Payment;
